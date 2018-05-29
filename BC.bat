@@ -72,6 +72,11 @@ goto end_set_sstream
 if "%iostream%"=="1" echo #include ^<iostream^> >>%output%
 if "%stdlib%"=="1" echo #include ^<stdlib.h^> >>%output%
 if "%sstream%"=="1" echo #include ^<sstream^> >>%output%
+find /i "chcp 65001" %File% >nul 
+if "%errorlevel%"=="0" (echo #include ^<windows.h^> >>%output% 
+echo #pragma execution_character_set("utf-8"^) >>%output%
+)
+
 echo. >>%output%
 echo using namespace std; >>%output%
 echo. >>%output%
@@ -112,8 +117,8 @@ set riga=riga%riga_number%
 
 for /F "skip=%skip_number% delims=" %%i in (%File%) do if not defined riga%riga_number% set "riga%riga_number%=%%i"
 echo riga%riga_number% !riga%riga_number%!
-set riga_number += 1
-set skip_number += 1
+set /a riga_number += 1
+set /a skip_number += 1
 if "%Ris%"=="%skip_number%" goto endloop1
 goto loop1
 :endloop1
@@ -192,6 +197,7 @@ if not "!sentence:~%space_new%,4!"=="http" goto cmd_command
 REM //////////////////////////////////////
 REM /////////// EXIT /////////////////////
 REM //////////////////////////////////////
+
 set /a take_exit=%countchar%-%space%
 if "!sentence:~%space%,%long%!"=="exit" (echo comando exit trovato
 echo system ^("!sentence:~%space%,%take_exit%!"^); >>%output%)
@@ -208,10 +214,21 @@ echo //!sentence:~4,%take%! >>%output%
 :skip_comment
 
 REM //////////////////////////////////////
+REM /////////// CHCP /////////////////////
+REM //////////////////////////////////////
+if "!sentence:~%space%,%long%!"=="chcp" goto chcp
+goto skip_chcp
+:chcp
+echo comando chcp trovato
+if "!sentence:~%space%,10!"=="chcp 65001" echo SetConsoleOutputCP(65001); >>%output%
+:skip_chcp
+
+REM //////////////////////////////////////
 REM /////////// SET //////////////////////
 REM //////////////////////////////////////
 set write=
 if "%sentence:~0,8!"=="setlocal" goto setlocal_settings
+if "!sentence:~0,4!"=="echo" goto skip_set_control
 if "!sentence:~0,3!"=="rem" goto skip_set_control
 if "!sentence:~%space%,6!"=="set /p" goto cin_input
 if "!sentence:~%space%,6!"=="set /a" goto calc_set_a
@@ -369,11 +386,19 @@ if "!sentence:~%space%,%long%!"=="move" goto cmd_command
 goto skip_cmd_command
 
 :cmd_command
-if "%sentence:~0,3%"=="rem" goto skip_cmd_command
-if "%sentence:~0,4%"=="echo" goto skip_cmd_command
-if "%sentence:~0,6%"=="set /p" goto skip_cmd_command
+set if_exist_before=0
+if "!sentence:~0,2!"=="if" set if_exist_before=1
+if "!sentence:~0,2!"=="If" set if_exist_before=1
+if "!sentence:~0,2!"=="iF" set if_exist_before=1
+if "!sentence:~0,2!"=="IF" set if_exist_before=1
+if "%if_exist_before%"=="1" echo ^{ >>%output%
+
+if "!sentence:~0,3!"=="rem" goto skip_cmd_command
+if "!sentence:~0,4!"=="echo" goto skip_cmd_command
+if "!sentence:~0,6!"=="set /p" goto skip_cmd_command
 set write=
 set triangle=^<^<
+
 echo comando !sentence:~%space%,%long%! trovato
 set /a where_check_cmd=%space%
 if "!sentence:~%where_check_cmd%,3!"=="%percent%%percent%%percent%" goto tripercent_cmd
@@ -446,9 +471,11 @@ echo countcheck_temp: %countcheck_temp%
 set /a cleaner=%countcheck_temp%-2
 if "%type%"=="text" set write=!write!" 
 if not "%type%"=="text" set write=!write:~0,%cleaner%!
+echo cmd.str(""); >>%output%
+echo cmd.clear(); >>%output%
 echo cmd^<^<!write!; >>%output%
 echo system(cmd.str().c_str()); >>%output%
-
+if "%if_exist_before%"=="1" echo ^} >>%output%
 :skip_cmd_command
 
 REM //////////////////////////////////////
@@ -598,7 +625,7 @@ set space_temp=%stored_space_temp%+2
 :valore2_loop
 if "!sentence:~%space_temp%,1!"=="!quotes!" (echo valore trovato a %space_temp%
 goto trova_fine_valore2)
-set /a space_temp += 1
+set /a space_temp=%space_temp%+1
 goto valore2_loop
 
 :trova_fine_valore2
