@@ -11,7 +11,7 @@ set output=%output_name%%extension%
 if "%~s1"=="" goto stop
 if exist %output% del %output%
 
-Set File=%~s1
+set File=%~s1
 set sstream=0
 set stdlib=0
 set iostream=0
@@ -227,7 +227,7 @@ REM //////////////////////////////////////
 REM /////////// SET //////////////////////
 REM //////////////////////////////////////
 set write=
-if "%sentence:~0,8!"=="setlocal" goto setlocal_settings
+if "!sentence:~0,8!"=="setlocal" goto setlocal_settings
 if "!sentence:~0,4!"=="echo" goto skip_set_control
 if "!sentence:~0,3!"=="rem" goto skip_set_control
 if "!sentence:~%space%,6!"=="set /p" goto cin_input
@@ -369,6 +369,8 @@ echo %write%; >>%output%
 REM //////////////////////////////////////
 REM //// GENERIC SYSTEM COMMAND (CMD) ////
 REM //////////////////////////////////////
+if "!sentence:~%space%,%long%!"=="mklink" goto cmd_command
+if "!sentence:~%space%,%long%!"=="attrib" goto cmd_command
 if "!sentence:~%space%,%long%!"=="del" goto cmd_command
 if "!sentence:~%space%,%long%!"=="erase" goto cmd_command
 if "!sentence:~%space%,%long%!"=="ren" goto cmd_command
