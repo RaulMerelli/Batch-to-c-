@@ -15,50 +15,51 @@ set File=%~s1
 set sstream=0
 set stdlib=0
 set iostream=0
-find /i "del" %File% >nul
+set errorlevel = find /i "del" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "erase" %File% >nul
+set errorlevel = find /i "erase" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "ren" %File% >nul
+set errorlevel = find /i "ren" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "rename" %File% >nul
+set errorlevel = find /i "rename" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "md" %File% >nul
+set errorlevel = find /i "md" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "mkdir" %File% >nul
+set errorlevel = find /i "mkdir" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "rd" %File% >nul
+set errorlevel = find /i "rd" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "rmdir" %File% >nul
+set errorlevel = find /i "rmdir" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "type" %File% >nul
+set errorlevel = find /i "type" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "cd" %File% >nul
+set errorlevel = find /i "cd" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "chdir" %File% >nul
+set errorlevel = find /i "chdir" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "dir" %File% >nul
+set errorlevel = find /i "dir" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "copy" %File% >nul
+set errorlevel = find /i "copy" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "move" %File% >nul
+set errorlevel = find /i "move" %File%
 if "%errorlevel%"=="0" goto sstream_set
-find /i "start" %File% >nul
+set errorlevel = find /i "start" %File%
 if "%errorlevel%"=="0" goto sstream_set
 :end_set_sstream
-find /i "echo" %File% >nul
+set errorlevel = find /i "echo" %File%
 if "%errorlevel%"=="0" set iostream=1
-find /i "set /p" %File% >nul
+set errorlevel = find /i "set /p" %File%
+echo %errorlevel%
 if "%errorlevel%"=="0" set iostream=1
-find /i "cls" %File% >nul
+set errorlevel = find /i "cls" %File%
 if "%errorlevel%"=="0" set stdlib=1
-find /i "pause" %File% >nul
+set errorlevel = find /i "pause" %File%
 if "%errorlevel%"=="0" set stdlib=1
-find /i "color" %File% >nul
+set errorlevel = find /i "color" %File%
 if "%errorlevel%"=="0" set stdlib=1
-find /i "title" %File% >nul
+set errorlevel = find /i "title" %File%
 if "%errorlevel%"=="0" set stdlib=1
-find /i "exit" %File% >nul
+set errorlevel = find /i "exit" %File%
 if "%errorlevel%"=="0" set stdlib=1
 goto end_libraries
 
@@ -68,6 +69,8 @@ set stdlib=1
 goto end_set_sstream
 
 :end_libraries
+echo iostream: %iostream%
+echo stdlib: %stdlib%
 
 if "%iostream%"=="1" echo #include ^<iostream^> >>%output%
 if "%stdlib%"=="1" echo #include ^<stdlib.h^> >>%output%
