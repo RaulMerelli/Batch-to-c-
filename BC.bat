@@ -3,7 +3,7 @@ set ex_point=!
 setlocal enableDelayedExpansion
 chcp 65001
 cls
-set program_version=0.0.0.10
+set program_version=0.0.0.11
 title Merelli BATCH TO C++ %program_version%
 set output_name=file
 set extension=.cpp
@@ -15,51 +15,54 @@ set File=%~s1
 set sstream=0
 set stdlib=0
 set iostream=0
-set errorlevel = find /i "del" %File%
+set start_from_1=1
+find /i "@echo off" %File% >nul 
+if "%errorlevel%"=="0" set start_from_1=0
+
+find /i "del" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "erase" %File%
+find /i "erase" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "ren" %File%
+find /i "ren" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "rename" %File%
+find /i "rename" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "md" %File%
+find /i "md" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "mkdir" %File%
+find /i "mkdir" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "rd" %File%
+find /i "rd" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "rmdir" %File%
+find /i "rmdir" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "type" %File%
+find /i "type" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "cd" %File%
+find /i "cd" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "chdir" %File%
+find /i "chdir" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "dir" %File%
+find /i "dir" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "copy" %File%
+find /i "copy" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "move" %File%
+find /i "move" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
-set errorlevel = find /i "start" %File%
+find /i "start" %File% >nul 
 if "%errorlevel%"=="0" goto sstream_set
 :end_set_sstream
-set errorlevel = find /i "echo" %File%
+find /i "echo" %File% >nul 
 if "%errorlevel%"=="0" set iostream=1
-set errorlevel = find /i "set /p" %File%
-echo %errorlevel%
+find /i "set /p" %File% >nul 
 if "%errorlevel%"=="0" set iostream=1
-set errorlevel = find /i "cls" %File%
+find /i "cls" %File% >nul 
 if "%errorlevel%"=="0" set stdlib=1
-set errorlevel = find /i "pause" %File%
+find /i "pause" %File% >nul 
 if "%errorlevel%"=="0" set stdlib=1
-set errorlevel = find /i "color" %File%
+find /i "color" %File% >nul 
 if "%errorlevel%"=="0" set stdlib=1
-set errorlevel = find /i "title" %File%
+find /i "title" %File% >nul 
 if "%errorlevel%"=="0" set stdlib=1
-set errorlevel = find /i "exit" %File%
+find /i "exit" %File% >nul 
 if "%errorlevel%"=="0" set stdlib=1
 goto end_libraries
 
@@ -69,6 +72,7 @@ set stdlib=1
 goto end_set_sstream
 
 :end_libraries
+echo sstream: %sstream%
 echo iostream: %iostream%
 echo stdlib: %stdlib%
 
@@ -98,14 +102,13 @@ set File=temp.bat
 
 call :Conta %File% ris
 echo.
-echo Programma di conversione automatica di codice da batch a C++ creato da Raul Merelli.
-echo Versione %program_version%
+echo Automatic code conversion program from batch to C++ created by Raul Merelli.
+echo Version %program_version%
 echo.
 echo.
 echo FILE: %OriginalFile%
-echo TOTALE RIGHE: %Ris%
-if "%Ris%"=="1" goto stop
-echo premi qualsiasi tasto per avviare l'analisi.
+echo TOTAL ROWS: %Ris%
+echo Press any key to start the analisys
 pause >nul
 echo.
 echo ------------
@@ -113,26 +116,41 @@ echo  DEBUG MODE
 echo ------------
 echo.
 echo.
+
+
 set riga_number=2
 set skip_number=1
-:loop1
-set riga=riga%riga_number%
+set numero_ripetizione=2
+if "%start_from_1%"=="1" goto row1 else (
+echo @echo off found
+if "%Ris%"=="1" goto stop 
+)
+goto loop1
 
+:row1
+echo there is no @echo off
+set riga_number=1
+set numero_ripetizione=1
+set skip_number=0
+set /p riga%riga_number%=< %File%
+
+:loop1
+if not "%riga_number%"=="1" (
 for /F "skip=%skip_number% delims=" %%i in (%File%) do if not defined riga%riga_number% set "riga%riga_number%=%%i"
-echo riga%riga_number% !riga%riga_number%!
+)
+echo ROW%riga_number% !riga%riga_number%!
 set /a riga_number += 1
 set /a skip_number += 1
 if "%Ris%"=="%skip_number%" goto endloop1
 goto loop1
 :endloop1
 
-REM PAROLE
+REM WORDS
 
-set numero_ripetizione=2
 :numero_ripetizione
 set sentence=!riga%numero_ripetizione%!
 echo.
-echo RIGA%numero_ripetizione%:
+echo ROW%numero_ripetizione%:
 set round=0
 set countcheck=0
 echo %sentence%
@@ -147,7 +165,7 @@ set /a countcheck += 1
 goto retry_count
 :stop_count
 
-echo numero caratteri=%countcheck%
+echo character number=%countcheck%
 set sentence=%old_sentence%
 set countchar=%countcheck%
 
@@ -161,7 +179,7 @@ goto skip_space_found
 
 :space_found
 set /a long=%countcheck%-%space%
-if not "!sentence:~%space%,%long%!"=="" echo parola trovata da %space% a %countcheck%: !sentence:~%space%,%long%!
+if not "!sentence:~%space%,%long%!"=="" echo word found from %space% to %countcheck%: !sentence:~%space%,%long%!
 
 REM //////////////////////////////////////
 REM /////////// PAUSE ////////////////////
@@ -172,11 +190,11 @@ if "!sentence:~0,2!"=="iF" goto pause_nul_for_if
 if "!sentence:~0,2!"=="If" goto pause_nul_for_if
 if "!sentence:~0,2!"=="IF" goto pause_nul_for_if
 
-if "!sentence:~%space%,%long%!"=="pause" (echo comando pause trovato
+if "!sentence:~%space%,%long%!"=="pause" (echo pause command found
 echo system ^("!riga%numero_ripetizione%!"^); >>%output%)
 goto skip_pause_nul_for_if
 :pause_nul_for_if
-if "!sentence:~%space%,%long%!"=="pause" (echo comando pause trovato
+if "!sentence:~%space%,%long%!"=="pause" (echo pause command found
 echo system ^("pause >nul"^); >>%output%)
 :skip_pause_nul_for_if
 
@@ -188,7 +206,7 @@ if "!sentence:~%space%,%long%!"=="Start" goto start_command_found
 if "!sentence:~%space%,%long%!"=="START" goto start_command_found
 goto skip_start
 :start_command_found
-echo comando start trovato
+echo start command found
 set /a space_new=%space%+6
 set /a take_start=%countchar%-%space%
 echo countchar: %countchar% space: %space%
@@ -202,7 +220,7 @@ REM /////////// EXIT /////////////////////
 REM //////////////////////////////////////
 
 set /a take_exit=%countchar%-%space%
-if "!sentence:~%space%,%long%!"=="exit" (echo comando exit trovato
+if "!sentence:~%space%,%long%!"=="exit" (echo exit command found
 echo system ^("!sentence:~%space%,%take_exit%!"^); >>%output%)
 
 REM //////////////////////////////////////
@@ -211,7 +229,7 @@ REM //////////////////////////////////////
 if "!sentence:~%space%,%long%!"=="rem" goto comment
 goto skip_comment
 :comment
-echo commento trovato
+echo comment found
 set /a take=%countchar%-4
 echo //!sentence:~4,%take%! >>%output%
 :skip_comment
@@ -222,7 +240,7 @@ REM //////////////////////////////////////
 if "!sentence:~%space%,%long%!"=="chcp" goto chcp
 goto skip_chcp
 :chcp
-echo comando chcp trovato
+echo chcp command found
 if "!sentence:~%space%,10!"=="chcp 65001" echo SetConsoleOutputCP(65001); >>%output%
 :skip_chcp
 
@@ -238,7 +256,7 @@ if "!sentence:~%space%,6!"=="set /a" goto calc_set_a
 if "!sentence:~%space%,%long%!"=="set" goto set_control
 goto skip_set_control
 :set_control
-echo comando set trovato
+echo set command trovato
  
 
 set /a set_normal_where=%long%+%space%+1
@@ -260,12 +278,12 @@ REM //////////////////////////////////////
 :cin_input
 set quotes="
 
-if "!sentence:~%space%,6!"=="set /p" echo comando input trovato
+if "!sentence:~%space%,6!"=="set /p" echo input command found
 set /a take=%countchar%-(%space%+7)
 set /a where_cin=%space%+7
 set original_where_cin=%where_cin%
 :cin_loop1
-if "%where_cin%"=="%countchar%" (echo probabile errore di sinstassi1
+if "%where_cin%"=="%countchar%" (echo probable syntax error 1
 goto skip_set_control)
 if "!sentence:~%where_cin%,1!"=="=" goto pre_cin_loop2
 set /a where_cin += 1
@@ -283,18 +301,18 @@ goto cin_loop2
 :found_cin_quotes1
 set /a where_cin_quotes2=%where_cin_quotes1%+1
 :cin_loop3
-if "%where_cin_quotes2%"=="%countchar%" (echo probabile errore di sinstassi2
+if "%where_cin_quotes2%"=="%countchar%" (echo probable syntax error 2
 goto skip_set_control)
 if "!sentence:~%where_cin_quotes2%,1!"=="!quotes!" goto found_cin_quotes2
 set /a where_cin_quotes2 += 1
 goto cin_loop3
 
 :found_cin_quotes2
-echo le virgolette le ho trovate a %where_cin_quotes1% e a %where_cin_quotes2%.
+echo I found the quotes at %where_cin_quotes1% and at %where_cin_quotes2%.
 set /a check_third_case=%where_cin_quotes1%-1
 if "!sentence:~%check_third_case%,1!"=="=" goto third_case
 :skip_search_quotes
-echo ho trovato l'uguale a %where_cin%. prima dell'uguale c'e il nome variabile, dopo invece il cout
+echo I found the equal to %where_cin%. before the equal there is the variable name, after the cout instead
 
 if not "%where_cin_quotes2%"=="" goto quotes_content
 goto noquotes_content
@@ -341,9 +359,9 @@ goto skip_echo_command
 
 :setlocal_settings
 set_local_delayed_expansion=0
-if "!sentence:~%space%,6!"=="setlocal enabledelayedexpansion" (echo espansione comandi attivata
+if "!sentence:~%space%,6!"=="setlocal enabledelayedexpansion" (echo delayed expansion enabled
 set_local_delayed_expansion=1)
-if "!sentence:~%space%,6!"=="set /a" (echo espansione comandi disattivata
+if "!sentence:~%space%,6!"=="set /a" (echo delayed expansion disabled
 set_local_delayed_expansion=0)
 goto skip_set_control
 
@@ -354,7 +372,7 @@ REM //////////////////////////////////////
 :calc_set_a
  
 set write=
-if "!sentence:~%space%,6!"=="set /a" echo comando calcolo trovato
+if "!sentence:~%space%,6!"=="set /a" echo calculation command found
 
 set /a set_a_where=7+%space%
 :set_a_loop1
@@ -404,7 +422,7 @@ if "!sentence:~0,6!"=="set /p" goto skip_cmd_command
 set write=
 set triangle=^<^<
 
-echo comando !sentence:~%space%,%long%! trovato
+echo !sentence:~%space%,%long%! command found
 set /a where_check_cmd=%space%
 if "!sentence:~%where_check_cmd%,3!"=="%percent%%percent%%percent%" goto tripercent_cmd
 if "!sentence:~%where_check_cmd%,1!"=="%percent%" (set old_pos=%where_check_cmd%
@@ -486,21 +504,21 @@ if "%if_exist_before%"=="1" echo ^} >>%output%
 REM //////////////////////////////////////
 REM /////////// CLS //////////////////////
 REM //////////////////////////////////////
-if "!sentence:~%space%,%long%!"=="cls" (echo comando cls trovato
+if "!sentence:~%space%,%long%!"=="cls" (echo cls command found
 echo system ^("cls"^); >>%output%)
 
 REM //////////////////////////////////////
 REM /////////// TITLE ////////////////////
 REM //////////////////////////////////////
 set /a take_title=%countchar%-%space%
-if "!sentence:~%space%,%long%!"=="title" (echo comando title trovato
+if "!sentence:~%space%,%long%!"=="title" (echo title command found
 echo system ^("!sentence:~%space%,%take_title%!"^); >>%output%)
 
 REM //////////////////////////////////////
 REM /////////// COLOR ////////////////////
 REM //////////////////////////////////////
 set /a take_color=%countchar%-%space%
-if "!sentence:~%space%,%long%!"=="color" (echo comando color trovato
+if "!sentence:~%space%,%long%!"=="color" (echo color command found
 echo system ^("!sentence:~%space%,%take_color%!"^); >>%output%)
 
 REM //////////////////////////////////////
@@ -512,7 +530,7 @@ if "!sentence:~%space%,%long%!"=="iF" goto if_command
 if "!sentence:~%space%,%long%!"=="IF" goto if_command
 goto skip_if_command
 :if_command
-echo comando if trovato
+echo if command found
 set quotes="
 set not=0
 set operator===
@@ -521,21 +539,21 @@ set operator===
 REM /////////// PRIMO VALORE /////////////
 if "!sentence:~3,2!"=="!quotes!!percent!" (echo variabile trovata nel primo valore
 goto trova_fine_variabile)
-if "!sentence:~3,1!"=="!quotes!" (echo nessuna variabile trovata nel primo valore
+if "!sentence:~3,1!"=="!quotes!" (echo no variable found in the first value
 goto trova_valore1)
 if "!sentence:~3,3!"=="not" goto if_with_not
 if "!sentence:~3,3!"=="Not" goto if_with_not
 if "!sentence:~3,3!"=="NOT" goto if_with_not
-echo Probabile errore a riga%numero_ripetizione%!
+echo Possible error at row%numero_ripetizione%!
 goto skip_if_command
 
 :if_with_not
 set not=1
 echo trovato not dopo if
 set operator=!ex_point!=
-if "!sentence:~7,2!"=="!quotes!!percent!" (echo variabile trovata nel primo valore
+if "!sentence:~7,2!"=="!quotes!!percent!" (echo variable found in the first value
 goto trova_fine_variabile)
-if "!sentence:~7,1!"=="!quotes!" (echo nessuna variabile trovata nel primo valore
+if "!sentence:~7,1!"=="!quotes!" (echo no variable found in the first value
 goto trova_valore1)
 
 :trova_fine_variabile
@@ -543,7 +561,7 @@ set space_temp=4
 if "%not%"=="1" set space_temp=8
 set /a sub_space_temp=%space_temp%+1
 :loop_trova_fine_variabile
-if "!sentence:~%space_temp%,2!"=="!percent!!quotes!" (echo fine variabile trovata a %space_temp%
+if "!sentence:~%space_temp%,2!"=="!percent!!quotes!" (echo end variable found at %space_temp%
 goto skip_trova_fine_variabile)
 set /a space_temp += 1
 if "%space_temp%"=="%countchar%" goto skip_trova_fine_variabile
@@ -559,7 +577,7 @@ set space_temp=4
 if "%not%"=="1" set space_temp=8
 set sub_space_temp=%space_temp%
 :loop_trova_fine_valore
-if "!sentence:~%space_temp%,1!"=="!quotes!" (echo fine valore trovata a %space_temp%
+if "!sentence:~%space_temp%,1!"=="!quotes!" (echo end value found at %space_temp%
 goto skip_trova_fine_valore)
 set /a space_temp += 1
 if "%space_temp%"=="%countchar%" goto skip_trova_fine_valore
@@ -600,7 +618,7 @@ set stored_space_temp=%space_temp%
 if not "%space_temp%"=="" goto loop_trova_variabile2
 set space_temp=4
 :loop_trova_variabile2
-if "!sentence:~%space_temp%,2!"=="!quotes!!percent!" (echo nuova variabile trovata a %space_temp%
+if "!sentence:~%space_temp%,2!"=="!quotes!!percent!" (echo new variable found at %space_temp%
 goto trova_fine_variabile2)
 set /a space_temp += 1
 if "%space_temp%"=="%countchar%" goto trova_eventuale_valore2
@@ -608,7 +626,7 @@ goto loop_trova_variabile2
 
 :trova_fine_variabile2
 if "%space_temp_old%"=="" set space_temp_old=%space_temp%
-if "!sentence:~%space_temp%,2!"=="!percent!!quotes!" (echo fine nuova variabile trovata a %space_temp%
+if "!sentence:~%space_temp%,2!"=="!percent!!quotes!" (echo end new variable found at %space_temp%
 goto skip_trova_fine_variabile2)
 set /a space_temp += 1
 if "%space_temp%"=="%countchar%" goto trova_eventuale_valore2
@@ -617,7 +635,7 @@ goto trova_fine_variabile2
 :skip_trova_fine_variabile2
 set /a place_val_2=%space_temp%-%space_temp_old%-2
 set /a space_temp_old += 2
-echo la seconda variabile dovrebbe essere: !sentence:~%space_temp_old%,%place_val_2%!
+echo the second variable should be: !sentence:~%space_temp_old%,%place_val_2%!
 set v2=!sentence:~%space_temp_old%,%place_val_2%!
 set space_temp_old=
 set place_val_2=
@@ -625,10 +643,10 @@ goto skip_trova_variabile2
 
 :trova_eventuale_valore2
 set "space_temp_old="
-echo non c'e una seconda variabile, forse e' un valore
+echo there is no a second variable, maybe is a value
 set space_temp=%stored_space_temp%+2
 :valore2_loop
-if "!sentence:~%space_temp%,1!"=="!quotes!" (echo valore trovato a %space_temp%
+if "!sentence:~%space_temp%,1!"=="!quotes!" (echo value found at %space_temp%
 goto trova_fine_valore2)
 set /a space_temp=%space_temp%+1
 goto valore2_loop
@@ -637,7 +655,7 @@ goto valore2_loop
 set space_temp_old=%space_temp%
 set /a space_temp += 1
 :loop_trova_fine_valore2
-if "!sentence:~%space_temp%,1!"=="!quotes!" (echo fine valore2 trovata a %space_temp%
+if "!sentence:~%space_temp%,1!"=="!quotes!" (echo end value2 found at %space_temp%
 goto skip_trova_valore2)
 set /a space_temp += 1
 if "%space_temp%"=="%countchar%" goto skip_trova_variabile2
@@ -646,7 +664,7 @@ goto loop_trova_fine_valore2
 :skip_trova_valore2
 set /a place_val_2=%space_temp%-%space_temp_old%-1
 set /a space_temp_old += 1
-echo valore2 dovrebbe essere: !sentence:~%space_temp_old%,%place_val_2%!
+echo value2 should be: !sentence:~%space_temp_old%,%place_val_2%!
 set v2=!sentence:~%space_temp_old%,%place_val_2%!
 
 set is_number2=1
@@ -695,7 +713,7 @@ goto skip_goto
 set /a take_for_goto=%countchar%-%space%-4
 set /a space_new=%space%+4
 echo sentence size: %countchar%
-echo comando goto trovato
+echo goto command found
 echo goto!sentence:~%space_new%,%take_for_goto%!; >>%output%
 
 :skip_goto
@@ -709,7 +727,7 @@ goto skip_echo_command
 :echo_command
 set write=
 set triangle=^<^<
-echo comando echo trovato
+echo echo command found
 set /a where_check_echo=%space%+%long%+1
 if "!sentence:~%where_check_echo%,3!"=="%percent%%percent%%percent%" goto tripercent
 if "!sentence:~%where_check_echo%,1!"=="%percent%" (set old_pos=%where_check_echo%
@@ -790,12 +808,12 @@ goto count_words
 if "!sentence:~0,6!"=="set /p" goto total
 set /a long=%countcheck%-%space%
 
-if not "!sentence:~%space%,%long%!"=="" echo parola trovata da %space% a %countcheck%: !sentence:~%space%,%long%!
+if not "!sentence:~%space%,%long%!"=="" echo word found from %space% to %countcheck%: !sentence:~%space%,%long%!
 
 REM //////////////////////////////////////
 REM /////////// CLS //////////////////////
 REM //////////////////////////////////////
-if "!sentence:~%space%,%long%!"=="cls" (echo comando cls trovato
+if "!sentence:~%space%,%long%!"=="cls" (echo cls command found
 echo system ^("cls"^); >>%output%)
 
 REM //////////////////////////////////////
@@ -806,31 +824,31 @@ if "!sentence:~0,2!"=="iF" goto pause_for_if
 if "!sentence:~0,2!"=="If" goto pause_for_if
 if "!sentence:~0,2!"=="IF" goto pause_for_if
 
-if "!sentence:~%space%,%long%!"=="pause" (echo comando pause trovato
+if "!sentence:~%space%,%long%!"=="pause" (echo pause command found
 echo system ^("!riga%numero_ripetizione%!"^); >>%output%)
 goto skip_pause_for_if
 :pause_for_if
-if "!sentence:~%space%,%long%!"=="pause" (echo comando pause trovato
+if "!sentence:~%space%,%long%!"=="pause" (echo pause command found
 echo system ^("pause"^); >>%output%)
 :skip_pause_for_if
 
 REM //////////////////////////////////////
 REM /////////// COLOR ////////////////////
 REM //////////////////////////////////////
-if "!sentence:~%space%,%long%!"=="color" (echo comando color trovato
+if "!sentence:~%space%,%long%!"=="color" (echo color command found
 echo system ^("%sentence%"^); >>%output%)
 
 REM //////////////////////////////////////
 REM /////////// TITLE ////////////////////
 REM //////////////////////////////////////
-if "!sentence:~%space%,%long%!"=="title" (echo comando title trovato
+if "!sentence:~%space%,%long%!"=="title" (echo title command found
 echo system ^("%sentence%"^); >>%output%)
 
 REM //////////////////////////////////////
 REM /////////// EXIT /////////////////////
 REM //////////////////////////////////////
 set /a take_exit=%countchar%-%space%
-if "!sentence:~%space%,%long%!"=="exit" (echo comando exit trovato
+if "!sentence:~%space%,%long%!"=="exit" (echo exit command found
 echo system ^("!sentence:~%space%,%take_exit%!"^); >>%output%)
 
 REM //////////////////////////////////////
@@ -839,7 +857,7 @@ REM //////////////////////////////////////
 if "!sentence:~0,1!"==":" goto echo_label
 goto skip_label_command
 :echo_label
-echo etichetta trovata
+echo label found
 set /a take=%countchar%-1
 echo !sentence:~1,%take%!: >>%output%
 :skip_label_command
@@ -847,7 +865,7 @@ echo !sentence:~1,%take%!: >>%output%
 REM //////////////////////////////////////
 REM /////////// ECHO. / ENDL /////////////
 REM //////////////////////////////////////
-if "!sentence:~0,%long%!"=="echo." (echo comando echo. trovato
+if "!sentence:~0,%long%!"=="echo." (echo echo. command found
 echo cout^<^<endl; >>%output%)
 
 if "!sentence:~0,2!"=="if" goto echo_dot_ok
@@ -862,7 +880,7 @@ echo cout^<^<endl; >>%output%)
 
 
 :total
-echo complessivamente ho trovato %round% parole.
+echo overall I found %round% words.
 
 if "%numero_ripetizione%"=="%ris%" goto stop_conta_parole
 set /a numero_ripetizione += 1
@@ -872,14 +890,14 @@ goto numero_ripetizione
 echo. >>%output%
 echo return 0;^} >>%output%
 echo.
-echo Fine - file salvato come %output%.
+echo End - file saved as %output%.
 del %File%
 pause >Nul
 exit
 
 :stop
 echo.
-echo Nessun file caricato.
+echo No file loaded.
 pause >Nul
 exit
 
